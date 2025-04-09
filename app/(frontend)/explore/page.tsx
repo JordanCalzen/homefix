@@ -95,85 +95,90 @@ const services = [
 
 export default function ExplorePage() {
 	return (
-		<div className="min-h-screen bg-white font-[Montserrat]">
+		<div className="min-h-screen bg-white font-[Montserrat] bg-gradient-to-b from-blue-300 to-blue-50">
 			{/* Header */}
-			<header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-				<div className=" flex h-16 items-center justify-between">
-					<Link
-						href="/"
-						className=" w-[250px] lg:w-[200px] flex items-center gap-2 p-3"
-					>
-						<Image
-							src="/homeFixIcon.png"
-							alt=""
-							width={300}
-							height={300}
-							className="w-full h-full object-cover object-center"
-						/>
-					</Link>
+			<div className="px-2 pt-2 sticky top-0 z-50 w-full">
+				<header className=" border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 rounded-lg">
+					<div className=" flex h-16 items-center justify-between">
+						<Link
+							href="/"
+							className=" w-[250px] lg:w-[200px] flex items-center gap-2 p-3"
+						>
+							<Image
+								src="/homeFixIcon.png"
+								alt=""
+								width={300}
+								height={300}
+								className="w-full h-full object-cover object-center"
+							/>
+						</Link>
 
-					<nav className="hidden md:flex items-center gap-6">
-						<Link
-							href="#"
-							className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
-						>
-							Home
-						</Link>
-						<Link
-							href="#"
-							className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
-						>
-							Explore
-						</Link>
-						<Link
-							href="#"
-							className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
-						>
-							Providers
-						</Link>
-					</nav>
+						<nav className="hidden md:flex items-center gap-6">
+							<Link
+								href="#"
+								className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+							>
+								Home
+							</Link>
+							<Link
+								href="#"
+								className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+							>
+								Explore
+							</Link>
+							<Link
+								href="#"
+								className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+							>
+								Providers
+							</Link>
+						</nav>
 
-					<div className="flex items-center gap-4">
-						<Button variant="outline" className="hidden sm:flex">
-							Sign In
-						</Button>
-						<Button className="bg-blue-100 text-blue-800 hover:bg-blue-200">
-							Sign Up
-						</Button>
-						<Sheet>
-							<SheetTrigger asChild>
-								<Button
-									variant="ghost"
-									className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
-								>
-									<Menu className="h-6 w-6" />
-									<span className="sr-only">Toggle Menu</span>
-								</Button>
-							</SheetTrigger>
-							<SheetContent side="left" className="pr-0">
-								<nav className="grid gap-6 px-2 py-6">
-									<Link href="/browse" className="hover:text-foreground/80">
-										Providers
-									</Link>
-									<Link href="/sell" className="hover:text-foreground/80">
-										Services
-									</Link>
-									<Link href="/governance" className="hover:text-foreground/80">
-										Reviews
-									</Link>
-									<Link href="/profile" className="hover:text-foreground/80">
-										Profile
-									</Link>
-								</nav>
-							</SheetContent>
-						</Sheet>
+						<div className="flex items-center gap-4">
+							<Button variant="outline" className="hidden sm:flex">
+								Sign In
+							</Button>
+							<Button className="bg-blue-100 text-blue-800 hover:bg-blue-200">
+								Sign Up
+							</Button>
+							<Sheet>
+								<SheetTrigger asChild>
+									<Button
+										variant="ghost"
+										className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+									>
+										<Menu className="h-6 w-6" />
+										<span className="sr-only">Toggle Menu</span>
+									</Button>
+								</SheetTrigger>
+								<SheetContent side="left" className="pr-0">
+									<nav className="grid gap-6 px-2 py-6">
+										<Link href="/browse" className="hover:text-foreground/80">
+											Providers
+										</Link>
+										<Link href="/sell" className="hover:text-foreground/80">
+											Services
+										</Link>
+										<Link
+											href="/governance"
+											className="hover:text-foreground/80"
+										>
+											Reviews
+										</Link>
+										<Link href="/profile" className="hover:text-foreground/80">
+											Profile
+										</Link>
+									</nav>
+								</SheetContent>
+							</Sheet>
+						</div>
 					</div>
-				</div>
-			</header>
+				</header>
+			</div>
 
 			<main>
 				{/* Hero Section */}
-				<section className="py-12 md:py-16 bg-gradient-to-b from-blue-50 to-white">
+				<section className="py-12 md:py-16 ">
 					<div className=" px-2">
 						<div className="max-w-3xl mx-auto text-center">
 							<h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight font-[Sora] text-gray-900 mb-4">
