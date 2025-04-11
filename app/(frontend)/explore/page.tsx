@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -15,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 import {
 	Card,
 	CardContent,
@@ -178,7 +180,81 @@ export default function ExplorePage() {
 
 			<main>
 				{/* Hero Section */}
-				<section className="py-12 md:py-16 ">
+				<section className="py-12 md:py-16 relative">
+					<div className="absolute inset-0 overflow-hidden pointer-events-none">
+						<motion.div
+							className="absolute -top-1/2 -left-1/2 w-full h-full bg-primary/10 dark:bg-primary/20 rounded-full"
+							animate={{
+								scale: [1, 1.1, 1],
+								rotate: [0, 90, 0],
+							}}
+							transition={{
+								duration: 20,
+								repeat: Number.POSITIVE_INFINITY,
+								ease: "linear",
+							}}
+						/>
+						<motion.div
+							className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-secondary/10 dark:bg-secondary/20 rounded-full"
+							animate={{
+								scale: [1, 1.2, 1],
+								rotate: [0, -90, 0],
+							}}
+							transition={{
+								duration: 25,
+								repeat: Number.POSITIVE_INFINITY,
+								ease: "linear",
+							}}
+						/>
+						<motion.div
+							className="absolute top-1/4 left-1/4 w-12 h-12 bg-primary/20 dark:bg-primary/30 rounded-full"
+							animate={{
+								y: [0, -20, 0],
+								x: [0, 20, 0],
+							}}
+							transition={{
+								duration: 5,
+								repeat: Number.POSITIVE_INFINITY,
+								ease: "easeInOut",
+							}}
+						/>
+						<motion.div
+							className="absolute top-1/4 left-1/4 w-12 h-12 bg-primary/20 dark:bg-primary/30 rounded-full"
+							animate={{
+								y: [0, -20, 0],
+								x: [0, 20, 0],
+							}}
+							transition={{
+								duration: 5,
+								repeat: Number.POSITIVE_INFINITY,
+								ease: "easeInOut",
+							}}
+						/>
+						<motion.div
+							className="absolute top-1/2 left-1/2 w-12 h-12 bg-primary/20 dark:bg-primary/30 rounded-full"
+							animate={{
+								y: [0, -20, 0],
+								x: [0, 20, 0],
+							}}
+							transition={{
+								duration: 5,
+								repeat: Number.POSITIVE_INFINITY,
+								ease: "easeInOut",
+							}}
+						/>
+						<motion.div
+							className="absolute bottom-[10%] right-1/4 w-8 h-8 bg-secondary/20 dark:bg-secondary/30 rounded-full"
+							animate={{
+								y: [0, 30, 0],
+								x: [0, -30, 0],
+							}}
+							transition={{
+								duration: 7,
+								repeat: Number.POSITIVE_INFINITY,
+								ease: "easeInOut",
+							}}
+						/>
+					</div>
 					<div className=" px-2">
 						<div className="max-w-3xl mx-auto text-center">
 							<h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight font-[Sora] text-gray-900 mb-4">
@@ -246,7 +322,7 @@ export default function ExplorePage() {
 
 				{/* Top-Rated Providers Section */}
 				<section className="py-12 md:py-16 bg-blue-50">
-					<div className="container">
+					<div className="px-2 md:px-8">
 						<h2 className="text-2xl md:text-3xl font-bold font-[Sora] text-gray-900 mb-8">
 							Top Service Providers
 						</h2>
@@ -561,7 +637,7 @@ export default function ExplorePage() {
 
 			{/* Floating Quote Calculator Button */}
 			<div className="fixed bottom-6 right-6">
-				<Button className="rounded-full h-14 w-14 shadow-lg bg-blue-600 hover:bg-blue-700">
+				<Button className="rounded-full h-14 w-14 shadow-lg animate-pulse bg-blue-600 hover:bg-blue-700">
 					<span className="sr-only">Get a Quote</span>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
