@@ -13,8 +13,66 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    String @id @default(cuid())
-  email String  @unique
-  name  String?
+model Role {
+  id           String   @id @default(cuid())
+  roleName     String   @unique          // e.g., "homeowner", "admin"
+  displayName  String                   // Human-readable label
+  description  String?
+  permissions  String[]     
+  users        User[]       @relation("UserRoles")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@index([roleName])
 }
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  phone         String    @unique
+  name          String
+  password      String?
+  image         String?
+  status        Boolean   @default(true)
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  roles         Role[]       @relation("UserRoles")
+  roleId        String?
+}
+
+model Service {
+  id            String    @id @default(cuid())
+  name          String
+  description   String
+  image         String?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model ServiceProvider {
+  id            String        @id @default(cuid())
+  name          String
+  bio           String?
+  phone         String?
+  email         String?       @unique
+  verified      Boolean       @default(false)
+  professionId  String
+  // services      Service[]     // Services this provider offers
+  rating        Float?        // Average rating
+  reviews       Review[]
+  createdAt     DateTime      @default(now())
+}
+
+model Review {
+  id            String    @id @default(cuid())
+  providerId     String
+  provider       ServiceProvider  @relation(fields: [providerId], references: [id])
+  rating         Int              @default(5)
+  comment        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+
+
