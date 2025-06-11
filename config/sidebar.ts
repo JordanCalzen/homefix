@@ -89,7 +89,7 @@ export const sidebarLinks: ISidebarLink[] = [
 			},
 			{
 				title: "All Services",
-				href: "/dashboard/services/create",
+				href: "/dashboard/service",
 				permission: "services.create",
 			},
 			{

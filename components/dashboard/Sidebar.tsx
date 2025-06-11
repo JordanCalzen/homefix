@@ -145,12 +145,12 @@ export default function Sidebar({ session, notifications = [] }: SidebarProps) {
 															"bg-gradient-to-r from-blue-100 to-blue-50 font-medium"
 													)}
 												>
-													{isHrefIncluded && (
+													{/* {isHrefIncluded && (
 														<motion.div
 															className="absolute left-0 top-0 bottom-0 w-1.5 bg-yellow-400"
 															layoutId="activeIndicator"
 														/>
-													)}
+													)} */}
 													<div
 														className={cn(
 															"text-blue-500 text-sm",
@@ -192,7 +192,7 @@ export default function Sidebar({ session, notifications = [] }: SidebarProps) {
 																			>
 																				{isMenuItemActive && (
 																					<motion.div
-																						className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"
+																						className="absolute left-0 top-0 bottom-0 w-1 "
 																						layoutId="activeSubmenuIndicator"
 																					/>
 																				)}
@@ -234,7 +234,7 @@ export default function Sidebar({ session, notifications = [] }: SidebarProps) {
 												>
 													{pathname === item.href && (
 														<motion.div
-															className="absolute left-0 top-0 bottom-0 w-1.5 bg-yellow-400"
+															className="absolute left-0 top-0 bottom-0 w-1.5 "
 															layoutId="activeIndicator"
 														/>
 													)}

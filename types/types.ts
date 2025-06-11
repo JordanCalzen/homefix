@@ -12,3 +12,8 @@ export type LoginProps = {
 	email: string;
 	password: string;
 };
+
+export interface CategoryOption {
+	value: string;
+	label: string;
+}

@@ -40,14 +40,35 @@ model User {
   roleId        String?
 }
 
+model Category {
+  id      String  @id @default(cuid())
+  name    String  @unique
+  slug   String   
+  description String?
+  image  String?
+  services Service[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
 model Service {
   id            String    @id @default(cuid())
   name          String
-  description   String
+  description   String?
   image         String?
-
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  categoryId    String
+  category      Category  @relation(fields: [categoryId], references: [id])
+  price         String
+  duration      String?
+  rating        Float?      @default(0)
+  reviewCount   Int?        @default(0)
+  featured      Boolean    @default(false)
+  popular       Boolean    @default(false)
+  isActive      Boolean    @default(true)
+  new           Boolean    @default(false)
+  isFavorite    Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
 model ServiceProvider {
