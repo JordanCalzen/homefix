@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 type ServiceApiResponse = {
+	id?: string;
 	success: boolean;
 	data?: any;
 	error?: string;

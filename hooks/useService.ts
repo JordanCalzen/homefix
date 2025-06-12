@@ -10,18 +10,7 @@ import {
 import { ServicePayLoad } from "@/types/service";
 import type { Category, Service } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-// import {
-//   createCategory,
-//   deleteCategory,
-//   getActiveCategories,
-//   getAllCategories,
-//   getCategoryById,
-//   getCategoryBySlug,
-//   updateCategory,
-//   getCategoriesByDepartment,
-//   getCategoryBySlugAndSubCategory,
-// } from "@/actions/categories"
-// import type { Props, CategoryWithRelations } from "@/types/types"
+import { redirect } from "next/navigation";
 import toast from "react-hot-toast";
 
 // Fetch all services
@@ -61,48 +50,41 @@ export const useFetchService = (serviceId: string) => {
 };
 
 // Delete a service
-// export const useDeleteService = () => {
-// 	const queryClient = useQueryClient();
+export const useDeleteService = () => {
+	const queryClient = useQueryClient();
 
-// 	const deleteServiceMutation = useMutation({
-// 		mutationFn: async (id: string) => {
-// 			return await deleteService(id);
-// 		},
-// 		onSuccess: (deletedService) => {
-// 			queryClient.setQueryData(["services"], (oldData: Service[] = []) =>
-// 				oldData.filter((srv) => srv.id !== deletedService.id)
-// 			);
-// 			queryClient.invalidateQueries({ queryKey: ["services"] });
+	const deleteServiceMutation = useMutation({
+		mutationFn: async (id: string) => {
+			return await deleteService(id);
+		},
+		onSuccess: (deletedService) => {
+			queryClient.invalidateQueries({ queryKey: ["services"] });
+			toast.success("Service deleted successfully");
+		},
+		onError: (error) => {
+			toast.error("An error occurred while deleting the service");
+			console.error(error);
+		},
+	});
 
-// 			toast.success("Service deleted successfully");
-// 		},
-// 		onError: (error) => {
-// 			toast.error("An error occurred while deleting the service");
-// 			console.error(error);
-// 		},
-// 	});
+	return {
+		deleteService: deleteServiceMutation.mutate,
+		isDeleting: deleteServiceMutation.isPending,
+		error: deleteServiceMutation.error,
+	};
+};
 
-// 	return {
-// 		deleteService: deleteServiceMutation.mutate,
-// 		isDeleting: deleteServiceMutation.isPending,
-// 		error: deleteServiceMutation.error,
-// 	};
-// };
-
-// Create a category
-export const useCreateCategory = () => {
+// Create a service
+export const useCreateService = () => {
 	const queryClient = useQueryClient();
 
 	const createServiceMutation = useMutation({
 		mutationFn: async (service: ServicePayLoad) => {
 			const result = await createService(service);
+			console.log(result);
 			return result;
 		},
 		onSuccess: (newService) => {
-			queryClient.setQueryData(["services"], (oldData: Service[] = []) => [
-				...oldData,
-				newService,
-			]);
 			queryClient.invalidateQueries({ queryKey: ["services"] });
 			toast.success("Service created successfully");
 		},
@@ -121,48 +103,47 @@ export const useCreateCategory = () => {
 };
 
 // Update a service
-// export const useUpdateService = () => {
-// 	const queryClient = useQueryClient();
+export const useUpdateService = () => {
+	const queryClient = useQueryClient();
 
-// 	const updateServiceMutation = useMutation({
-// 		mutationFn: async ({
-// 			id,
-// 			service,
-// 		}: {
-// 			id: string;
-// 			service: ServicePayLoad;
-// 		}) => {
-// 			return await updateService(id, service);
-// 		},
-// 		onSuccess: (updatedService) => {
-// 			queryClient.setQueryData(
-// 				["services"],
-// 				(oldData: Service[] | undefined) => {
-// 					if (!oldData) return [updatedService];
-// 					return oldData.map((srv) =>
-// 						srv.id === updatedService.id ? updatedService : srv
-// 					);
-// 				}
-// 			);
+	const updateServiceMutation = useMutation({
+		mutationFn: async ({
+			id,
+			service,
+		}: {
+			id: string;
+			service: ServicePayLoad;
+		}) => {
+			const result = await updateService(id, service);
+			return result;
+		},
+		onSuccess: (updatedService) => {
+			// Update the specific service in the services list
 
-// 			queryClient.invalidateQueries({ queryKey: ["categories"] });
-// 			queryClient.invalidateQueries({
-// 				queryKey: ["categories", updatedService.id],
-// 			});
-// 			toast.success("Category updated successfully");
-// 		},
-// 		onError: (error) => {
-// 			toast.error("An error occurred while updating the category");
-// 			console.error(error);
-// 		},
-// 	});
+			// Update individual service cache if it exists
+			queryClient.setQueryData(["service", updatedService.id], updatedService);
 
-// 	return {
-// 		updateCategory: updateCategoryMutation.mutate,
-// 		isUpdating: updateCategoryMutation.isPending,
-// 		error: updateCategoryMutation.error,
-// 	};
-// };
+			// Invalidate queries to ensure fresh data
+			queryClient.invalidateQueries({ queryKey: ["services"] });
+			queryClient.invalidateQueries({
+				queryKey: ["service", updatedService.id],
+			});
+
+			toast.success("Service updated successfully");
+		},
+		onError: (error: Error) => {
+			toast.error(
+				error.message || "An error occurred while updating the service"
+			);
+		},
+	});
+
+	return {
+		updateService: updateServiceMutation.mutate,
+		isUpdating: updateServiceMutation.isPending,
+		error: updateServiceMutation.error,
+	};
+};
 
 // Get category by slug
 // export const useCategoryDetails = (slug: string) => {
@@ -170,13 +151,5 @@ export const useCreateCategory = () => {
 // 		queryKey: ["category", slug],
 // 		queryFn: () => getCategoryBySlug(slug),
 // 		enabled: !!slug,
-// 	});
-// };
-
-// Get active categories
-// export const useActiveCategories = () => {
-// 	return useQuery({
-// 		queryKey: ["active-categories"],
-// 		queryFn: () => getActiveCategories(),
 // 	});
 // };

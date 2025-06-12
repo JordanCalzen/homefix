@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 import FormSelectInput from "@/components/FormInputs/FormSelectInput";
-import { ServicePayLoad } from "@/types/service";
+import { formPayLoad, ServicePayLoad } from "@/types/service";
 import { Service } from "@prisma/client";
 import {
 	Column,
@@ -28,7 +28,12 @@ import {
 	EntityForm,
 	TableActions,
 } from "../data-table";
-import { useFetchServices } from "@/hooks/useService";
+import {
+	useCreateService,
+	useDeleteService,
+	useFetchServices,
+	useUpdateService,
+} from "@/hooks/useService";
 import { useFetchCategories } from "@/hooks/useCategory";
 import {
 	Select,
@@ -39,8 +44,7 @@ import {
 } from "../ui/select";
 import { CategoryOption } from "@/types/types";
 import TextArea from "../FormInputs/TextAreaInput";
-
-// import { useSuspenseModel, useSuspenseModels } from "@/hooks/useModelQueries";
+import { redirect } from "next/navigation";
 
 interface ServiceDetailProps {
 	title: string;
@@ -50,7 +54,6 @@ const serviceFormSchema = z.object({
 	name: z.string().min(1, "Name is required"),
 	price: z.string().min(1, "Price is required"),
 	description: z.string().min(1, "Description is required"),
-	categoryId: z.string().min(1, "Category is required"),
 });
 
 type ServiceFormValues = z.infer<typeof serviceFormSchema>;
@@ -59,11 +62,10 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 	// React Query hooks with Suspense - note that data is always defined
 	const { services, refetch } = useFetchServices();
 
-	// const createServiceMutation = useCreateService();
-	// const updateProductMutation = useUpdateProduct();
-	// const deleteServiceMutation = useDeleteService();
+	const createServiceMutation = useCreateService();
+	const updateServiceMutation = useUpdateService();
+	const deleteServiceMutation = useDeleteService();
 	const { categories, isLoading: isLoadingCategories } = useFetchCategories();
-	console.log(categories);
 
 	// Local state
 	const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -90,7 +92,6 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 			name: "",
 			price: "",
 			description: "",
-			categoryId: "",
 		},
 	});
 
@@ -102,7 +103,6 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 				name: "",
 				price: "",
 				description: "",
-				categoryId: "",
 			});
 		} else {
 			// Editing existing - populate form
@@ -110,7 +110,6 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 				name: currentService.name,
 				price: currentService.price,
 				description: currentService.description ?? "",
-				categoryId: currentService.categoryId,
 			});
 		}
 	}, [currentService, form]);
@@ -186,45 +185,34 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 
 	// Handle form submission (edit or add)
 	const onSubmit = async (data: ServicePayLoad) => {
-		// if (!selectedModel) {
-		//   toast.error("Please select the Model");
-		//   return;
-		// }
-
+		// Validate category selection
+		console.log(data, "submitted data");
 		if (!currentService) {
 			// Add new product
 			data.categoryId = selectedCategory.value;
-			// data.categoryName = selectedCategory.label;
+			data.name = data.name;
 
 			if (!data.categoryId) {
-				toast.error("Please select the Model");
+				toast.error("Please select the Category for the service");
 				return;
 			}
 			console.log(data);
-			// createServiceMutation.mutate(data);
+			createServiceMutation.createService(data);
 		} else {
-			// Edit existing product
-			// updateServiceMutation.mutate({
-			// 	id: currentService.id,
-			// 	data,
-			// });
+			// Edit existing service
+			updateServiceMutation.updateService({
+				id: currentService.id,
+				service: data,
+			});
 		}
 	};
 
 	// Handle confirming delete
 	const handleConfirmDelete = () => {
 		if (serviceToDelete) {
-			// deleteProductMutation.mutate(serviceToDelete.id);
+			deleteServiceMutation.deleteService(serviceToDelete.id);
 		}
 	};
-
-	// Calculate total products value
-	// const getTotalValue = (products: Product[]) => {
-	// 	return products.reduce((total, product) => {
-	// 		const price = parseFloat(product.price.replace(/[^0-9.]/g, "")) || 0;
-	// 		return total + price;
-	// 	}, 0);
-	// };
 
 	// Define columns for the data table
 	const columns: Column<Service>[] = [
@@ -234,7 +222,7 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 			cell: (row) => <span className="font-medium">{row.name}</span>,
 		},
 		{
-			header: "Service",
+			header: "Description",
 			accessorKey: "description",
 		},
 		{
@@ -242,31 +230,19 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 			accessorKey: "price",
 		},
 		{
+			header: "Duration",
+			accessorKey: "duration",
+		},
+		{
 			header: "Date Added",
 			accessorKey: (row) => formatDate(row.createdAt),
 		},
 	];
 
-	// Generate subtitle with total value
-	const getSubtitle = (serviceCount: number, totalValue: number) => {
-		return `${serviceCount} ${
-			serviceCount === 1 ? "service" : "services"
-		} | Total Value: ${formatCurrency(totalValue)}`;
-	};
-
-	function getTotalValue(products: any): number {
-		throw new Error("Function not implemented.");
-	}
-
 	return (
 		<>
 			<DataTable<Service>
 				title={title}
-				// subtitle={
-				// 	services.length > 0
-				// 		? getSubtitle(service.length, getTotalValue(services))
-				// 		: undefined
-				// }
 				data={Array.isArray(services) ? services : []}
 				columns={columns}
 				keyField="id"
@@ -285,9 +261,10 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 					<TableActions.RowActions
 						onEdit={() => handleEditClick(item)}
 						onDelete={() => handleDeleteClick(item)}
-						// isDeleting={
-						// 	deleteProductMutation.isPending && serviceToDelete?.id === item.id
-						// }
+						isDeleting={
+							deleteServiceMutation.isDeleting &&
+							serviceToDelete?.id === item.id
+						}
 					/>
 				)}
 			/>
@@ -299,9 +276,9 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 				title={currentService ? "Edit Service" : "Add New Service"}
 				form={form}
 				onSubmit={onSubmit}
-				// isSubmitting={
-				// 	createCategoryMutation.isPending || updateCategoryMutation.isPending
-				// }
+				isSubmitting={
+					createServiceMutation.isCreating || updateServiceMutation.isUpdating
+				}
 				submitLabel={currentService ? "Save Changes" : "Add Service"}
 			>
 				<FormField
@@ -395,7 +372,7 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 					)
 				}
 				onConfirm={handleConfirmDelete}
-				// isConfirming={deleteServiceMutation.isPending}
+				isConfirming={deleteServiceMutation.isDeleting}
 				confirmLabel="Delete"
 				variant="destructive"
 			/>
