@@ -29,7 +29,7 @@ import {
 	TableActions,
 } from "../data-table";
 import { useFetchServices } from "@/hooks/useService";
-import { useFetchCategories } from "@/hooks/useCategory";
+
 import {
 	Select,
 	SelectContent,
@@ -39,6 +39,7 @@ import {
 } from "../ui/select";
 import { CategoryOption } from "@/types/types";
 import TextArea from "../FormInputs/TextAreaInput";
+import { useCategories } from "@/hooks/useCategory";
 
 // import { useSuspenseModel, useSuspenseModels } from "@/hooks/useModelQueries";
 
@@ -62,7 +63,7 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 	// const createServiceMutation = useCreateService();
 	// const updateProductMutation = useUpdateProduct();
 	// const deleteServiceMutation = useDeleteService();
-	const { categories, isLoading: isLoadingCategories } = useFetchCategories();
+	const { categories, isLoading: isLoadingCategories } = useCategories();
 	console.log(categories);
 
 	// Local state
@@ -72,7 +73,7 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 	const [currentService, setCurrentService] = useState<Service | null>(null);
 	const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
 
-	const categoryOptions: CategoryOption[] = categories.map((cat) => ({
+	const categoryOptions: CategoryOption[] = categories.map((cat:any) => ({
 		value: cat.id,
 		label: cat.name,
 	}));
