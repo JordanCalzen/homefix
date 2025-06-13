@@ -1,33 +1,33 @@
+// lib/providers/query-provider.tsx
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { useState, ReactNode } from "react";
 
-export default function ReactQueryProvider({
-	children,
-}: {
-	children: React.ReactNode;
-}) {
-	// const [queryClient] = useState(() => new QueryClient());
-	const [queryClient] = useState(
-		() =>
-			new QueryClient({
-				defaultOptions: {
-					queries: {
-						staleTime: 7 * 60 * 60 * 1000,
-						gcTime: 13 * 60 * 60 * 1000,
-						refetchOnWindowFocus: false,
-						retry: 2,
-					},
-				},
-			})
-	);
+interface QueryProviderProps {
+  children: ReactNode;
+}
 
-	// Note, typically gcTime should be longer than staleTime. Here's why:
-	// staleTime determines how long data is considered "fresh" before React Query will trigger a background refetch
-	// gcTime determines how long inactive data is kept in the cache before being removed entirely
+export default function QueryProvider({ children }: QueryProviderProps) {
+  // Create a client for each session to prevent shared state between users
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000, // 1 minute
+            gcTime: 5 * 60 * 1000, // 5 minutes
+            refetchOnWindowFocus: false,
+          },
+        },
+      })
+  );
 
-	return (
-		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-	);
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  );
 }
