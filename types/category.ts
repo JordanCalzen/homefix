@@ -1,6 +1,5 @@
 //payload for creating a service
 export type CategoryPayLoad = {
-	id: string;
 	name: string;
 	description?: string;
 	image?: string;
@@ -23,7 +22,7 @@ export type CategoryApiResponse = {
 };
 
 export type CategoryProps = {
-	id: string;
+	id?: string;
 	name: string;
 	description?: string;
 	image?: string;
