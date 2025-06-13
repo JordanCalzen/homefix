@@ -42,8 +42,8 @@ model User {
 
 model Category {
   id      String  @id @default(cuid())
-  name    String  @unique
-  slug   String   
+  name    String  
+  slug          String       @unique
   description String?
   image  String?
   services Service[]

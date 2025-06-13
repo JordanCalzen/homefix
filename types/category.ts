@@ -3,6 +3,7 @@ export type CategoryPayLoad = {
 	name: string;
 	description?: string;
 	image?: string;
+	slug: string;
 };
 
 //payload for updating a service
@@ -16,12 +17,12 @@ export type UpdateCategoryPayload = {
 export type CategoryApiResponse = {
 	success: boolean;
 	data?: any;
+	status?: number;
 	error?: string;
 };
 
 export type CategoryProps = {
 	id: string;
-	slug: string;
 	name: string;
 	description?: string;
 	image?: string;

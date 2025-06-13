@@ -28,12 +28,7 @@ import {
 	EntityForm,
 	TableActions,
 } from "../data-table";
-import {
-	useCreateService,
-	useDeleteService,
-	useFetchServices,
-	useUpdateService,
-} from "@/hooks/useService";
+import { useFetchServices } from "@/hooks/useService";
 import { useFetchCategories } from "@/hooks/useCategory";
 import {
 	Select,
@@ -44,7 +39,8 @@ import {
 } from "../ui/select";
 import { CategoryOption } from "@/types/types";
 import TextArea from "../FormInputs/TextAreaInput";
-import { redirect } from "next/navigation";
+
+// import { useSuspenseModel, useSuspenseModels } from "@/hooks/useModelQueries";
 
 interface ServiceDetailProps {
 	title: string;
@@ -62,10 +58,11 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 	// React Query hooks with Suspense - note that data is always defined
 	const { services, refetch } = useFetchServices();
 
-	const createServiceMutation = useCreateService();
-	const updateServiceMutation = useUpdateService();
-	const deleteServiceMutation = useDeleteService();
+	// const createServiceMutation = useCreateService();
+	// const updateProductMutation = useUpdateProduct();
+	// const deleteServiceMutation = useDeleteService();
 	const { categories, isLoading: isLoadingCategories } = useFetchCategories();
+	console.log(categories);
 
 	// Local state
 	const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -74,7 +71,7 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 	const [currentService, setCurrentService] = useState<Service | null>(null);
 	const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
 
-	const categoryOptions: CategoryOption[] = categories.map((cat) => ({
+	const categoryOptions: CategoryOption[] = categories.map((cat: any) => ({
 		value: cat.id,
 		label: cat.name,
 	}));

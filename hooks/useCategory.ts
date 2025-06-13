@@ -1,179 +1,134 @@
-"use client";
-
+// hooks/useProductQueries.ts
+import { categoryAPI } from "@/services/categories";
+import { CategoryPayLoad, UpdateCategoryPayload } from "@/types/category";
 import {
-	createCategory,
-	deleteCategory,
-	getAllCategories,
-	getCategoryById,
-} from "@/actions/category";
-import { CategoryProps } from "@/types/category";
-import type { Category } from "@prisma/client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+  useQuery,
+  useSuspenseQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
-// Fetch all categories
-export const useFetchCategories = () => {
-	const categoriesQuery = useQuery({
-		queryKey: ["categories"],
-		queryFn: async () => {
-			const data = await getAllCategories();
-			return data;
-		},
-	});
-
-	return {
-		categories: categoriesQuery.data?.data || [],
-		isLoading: categoriesQuery.isPending,
-		error: categoriesQuery.error,
-		refetch: categoriesQuery.refetch,
-	};
+// Query keys for caching
+export const categoryKeys = {
+  all: ["categories"] as const,
+  lists: () => [...categoryKeys.all, "list"] as const,
+  list: (filters: any) => [...categoryKeys.lists(), { filters }] as const,
+  filteredList: (dateFilter: any, searchQuery: string) =>
+    [...categoryKeys.lists(), { dateFilter, searchQuery }] as const,
+  details: () => [...categoryKeys.all, "detail"] as const,
+  detail: (id: string) => [...categoryKeys.details(), id] as const,
 };
 
-// Fetch a single category
-export const useFetchCategory = (categoryId: string) => {
-	const categoryQuery = useQuery({
-		queryKey: ["categories", categoryId],
-		queryFn: async () => {
-			const data = await getCategoryById(categoryId);
-			return data;
-		},
-		enabled: !!categoryId,
-	});
+/**
+ * Hook for fetching categories with standard loading states
+ */
+export function useCategories() {
+  // Get all categories with standard loading states
+  const {
+    data: categories = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: categoryKeys.lists(),
+    queryFn: categoryAPI.getAll,
+  });
 
-	return {
-		category: categoryQuery.data,
-		isLoading: categoryQuery.isPending,
-		error: categoryQuery.error,
-	};
-};
+  return {
+    categories,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  };
+}
 
-// Delete a category
-// export const useDeleteCategory = () => {
-// 	const queryClient = useQueryClient();
+/**
+ * Hook for fetching categories with React Suspense
+ * Use this when the component is wrapped in a Suspense boundary
+ */
+export function useSuspenseCategories() {
+  // Get all categories with Suspense (data is guaranteed to be defined)
+  const { data: categories, refetch } = useSuspenseQuery({
+    queryKey: categoryKeys.lists(),
+    queryFn: categoryAPI.getAll,
+  });
 
-// 	const deleteCategoryMutation = useMutation({
-// 		mutationFn: async (id: string) => {
-// 			return await deleteCategory(id);
-// 		},
-// 		onSuccess: (deletedCategory) => {
-// 			queryClient.setQueryData(["categories"], (oldData: Category[] = []) =>
-// 				oldData.filter((cat) => cat.id !== deletedCate)
-// 			);
-// 			queryClient.invalidateQueries({ queryKey: ["categories"] });
+  return {
+    categories,
+    refetch,
+  };
+}
 
-// 			toast.success("Category deleted successfully");
-// 		},
-// 		onError: (error) => {
-// 			toast.error("An error occurred while deleting the category");
-// 			console.error(error);
-// 		},
-// 	});
+export function useCategory(id: string) {
+  // Get a single category
+  return useQuery({
+    queryKey: categoryKeys.detail(id),
+    queryFn: () => categoryAPI.getById(id),
+    enabled: Boolean(id), // Only run if ID is provided
+  });
+}
 
-// 	return {
-// 		deleteCategory: deleteCategoryMutation.mutate,
-// 		isDeleting: deleteCategoryMutation.isPending,
-// 		error: deleteCategoryMutation.error,
-// 	};
-// };
+export function useCreateCategory() {
+  const queryClient = useQueryClient();
 
-// Create a category
-export const useCreateCategory = () => {
-	const queryClient = useQueryClient();
+  // Create a new Category
+  return useMutation({
+    mutationFn: (data: CategoryPayLoad) => categoryAPI.create(data),
+    onSuccess: () => {
+      toast.success("category added successfully");
+      // Invalidate categories list to trigger a refetch
+      queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to add category", {
+        description: error.message || "Unknown error occurred",
+      });
+    },
+  });
+}
 
-	const createCategoryMutation = useMutation({
-		mutationFn: async (category: CategoryProps) => {
-			const result = await createCategory(category);
-			return result;
-		},
-		onSuccess: (newCategory) => {
-			queryClient.setQueryData(["categories"], (oldData: Category[] = []) => [
-				...oldData,
-				newCategory,
-			]);
-			queryClient.invalidateQueries({ queryKey: ["categories"] });
-			toast.success("Category created successfully");
-		},
-		onError: (error: Error) => {
-			toast.error(
-				error.message || "An error occurred while creating the category"
-			);
-		},
-	});
+export function useUpdateCategory() {
+  const queryClient = useQueryClient();
 
-	return {
-		createCategory: createCategoryMutation.mutate,
-		isCreating: createCategoryMutation.isPending,
-		error: createCategoryMutation.error,
-	};
-};
+  // Update an existing category
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateCategoryPayload }) =>
+      categoryAPI.update(id, data),
+    onSuccess: (data, variables) => {
+      toast.success("category updated successfully");
+      // Invalidate specific category detail and list queries
+      queryClient.invalidateQueries({
+        queryKey: categoryKeys.detail(variables.id),
+      });
+      queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to update category", {
+        description: error.message || "Unknown error occurred",
+      });
+    },
+  });
+}
 
-// Update a category
-// export const useUpdateCategory = () => {
-// 	const queryClient = useQueryClient();
+export function useDeleteCategory() {
+  const queryClient = useQueryClient();
 
-// 	const updateCategoryMutation = useMutation({
-// 		mutationFn: async ({
-// 			id,
-// 			category,
-// 		}: {
-// 			id: string;
-// 			category: CategoryProps;
-// 		}) => {
-// 			return await updateCategory(id, category);
-// 		},
-// 		onSuccess: (updatedCategory) => {
-// 			queryClient.setQueryData(
-// 				["categories"],
-// 				(oldData: Category[] | undefined) => {
-// 					if (!oldData) return [updatedCategory];
-// 					return oldData.map((cat) =>
-// 						cat.id === updatedCategory.id ? updatedCategory : cat
-// 					);
-// 				}
-// 			);
-
-// 			queryClient.invalidateQueries({ queryKey: ["categories"] });
-// 			queryClient.invalidateQueries({
-// 				queryKey: ["categories", updatedCategory.id],
-// 			});
-// 			toast.success("Category updated successfully");
-// 		},
-// 		onError: (error) => {
-// 			toast.error("An error occurred while updating the category");
-// 			console.error(error);
-// 		},
-// 	});
-
-// 	return {
-// 		updateCategory: updateCategoryMutation.mutate,
-// 		isUpdating: updateCategoryMutation.isPending,
-// 		error: updateCategoryMutation.error,
-// 	};
-// };
-
-// Get category by slug
-// export const useCategoryDetails = (slug: string) => {
-// 	return useQuery({
-// 		queryKey: ["category", slug],
-// 		queryFn: () => getCategoryBySlug(slug),
-// 		enabled: !!slug,
-// 	});
-// };
-
-// Get active categories
-// export const useActiveCategories = () => {
-// 	return useQuery({
-// 		queryKey: ["active-categories"],
-// 		queryFn: () => getActiveCategories(),
-// 	});
-// };
-
-// Get categories by department
-// export const useCategoriesByDepartment = (departmentId: string) => {
-// 	return useQuery({
-// 		queryKey: ["categories-by-department", departmentId],
-// 		queryFn: () => getCategoriesByDepartment(departmentId),
-// 		enabled: !!departmentId,
-// 	});
-// };
+  // Delete a category
+  return useMutation({
+    mutationFn: (id: string) => categoryAPI.delete(id),
+    onSuccess: () => {
+      toast.success("category deleted successfully");
+      // Invalidate categories list to trigger a refetch
+      queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to delete category", {
+        description: error.message || "Unknown error occurred",
+      });
+    },
+  });
+}
