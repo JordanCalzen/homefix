@@ -28,8 +28,13 @@ import {
 	EntityForm,
 	TableActions,
 } from "../data-table";
-import { useFetchServices } from "@/hooks/useService";
-import { useFetchCategories } from "@/hooks/useCategory";
+import {
+	useCreateService,
+	useDeleteService,
+	useFetchServices,
+	useUpdateService,
+} from "@/hooks/useService";
+import { useCategories } from "@/hooks/useCategory";
 import {
 	Select,
 	SelectContent,
@@ -58,10 +63,10 @@ export default function ServiceDetail({ title }: ServiceDetailProps) {
 	// React Query hooks with Suspense - note that data is always defined
 	const { services, refetch } = useFetchServices();
 
-	// const createServiceMutation = useCreateService();
-	// const updateProductMutation = useUpdateProduct();
-	// const deleteServiceMutation = useDeleteService();
-	const { categories, isLoading: isLoadingCategories } = useFetchCategories();
+	const createServiceMutation = useCreateService();
+	const updateServiceMutation = useUpdateService();
+	const deleteServiceMutation = useDeleteService();
+	const { categories, isLoading: isLoadingCategories } = useCategories();
 	console.log(categories);
 
 	// Local state

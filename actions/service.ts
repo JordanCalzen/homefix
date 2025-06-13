@@ -210,7 +210,6 @@ export async function getServiceById(id: string) {
 	}
 }
 
-("use server");
 // import { prisma } from "@/prisma/db";
 
 // import { revalidatePath } from "next/cache";

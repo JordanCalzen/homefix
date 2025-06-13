@@ -84,12 +84,12 @@ export const sidebarLinks: ISidebarLink[] = [
 		dropdownMenu: [
 			{
 				title: "Category",
-				href: "/dashboard/services",
+				href: "/dashboard/service/categories",
 				permission: "services.read",
 			},
 			{
 				title: "All Services",
-				href: "/dashboard/service",
+				href: "/dashboard/service/allServices",
 				permission: "services.create",
 			},
 			{

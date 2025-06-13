@@ -9,13 +9,18 @@ import {
 } from "@/actions/service";
 import { ServicePayLoad } from "@/types/service";
 import type { Category, Service } from "@prisma/client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	useMutation,
+	useQuery,
+	useQueryClient,
+	useSuspenseQuery,
+} from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import toast from "react-hot-toast";
 
 // Fetch all services
 export const useFetchServices = () => {
-	const servicesQuery = useQuery({
+	const servicesQuery = useSuspenseQuery({
 		queryKey: ["services"],
 		queryFn: async () => {
 			const data = await getAllServices();
@@ -33,13 +38,12 @@ export const useFetchServices = () => {
 
 // Fetch a single service
 export const useFetchService = (serviceId: string) => {
-	const serviceQuery = useQuery({
+	const serviceQuery = useSuspenseQuery({
 		queryKey: ["services", serviceId],
 		queryFn: async () => {
 			const data = await getServiceById(serviceId);
 			return data;
 		},
-		enabled: !!serviceId,
 	});
 
 	return {
