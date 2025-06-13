@@ -49,7 +49,7 @@ import { redirect } from "next/navigation";
 interface ServiceDetailProps {
 	title: string;
 }
-// Form schema for editing/adding products
+// Form schema for editing/adding service
 const serviceFormSchema = z.object({
 	name: z.string().min(1, "Name is required"),
 	price: z.string().min(1, "Price is required"),

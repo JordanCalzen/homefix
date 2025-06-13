@@ -26,7 +26,7 @@ const updateServiceSchema = z.object({
 });
 
 /**
- * Creates a new product
+ * Creates a new service
  */
 export async function createService(
 	data: ServicePayLoad
@@ -56,17 +56,6 @@ export async function createService(
 				categoryId: validated.categoryId,
 			},
 		});
-
-		// await prisma.serviceModel.update({
-		// 	where: {
-		// 		id: validated.categoryId,
-		// 	},
-		// 	data: {
-		// 		inventoryCount: {
-		// 			increment: 1,
-		// 		},
-		// 	},
-		// });
 
 		return {
 			success: true,
@@ -116,6 +105,8 @@ export async function updateService(
 			data: validated,
 		});
 
+		revalidatePath("/dashboard/service");
+
 		return {
 			success: true,
 			data: updatedService,
@@ -151,6 +142,8 @@ export async function deleteService(id: string): Promise<ServiceApiResponse> {
 		await prisma.service.delete({
 			where: { id },
 		});
+
+		revalidatePath("/dashboard/service");
 
 		return {
 			success: true,

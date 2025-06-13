@@ -21,6 +21,7 @@ export type CategoryApiResponse = {
 
 export type CategoryProps = {
 	id: string;
+	slug: string;
 	name: string;
 	description?: string;
 	image?: string;
