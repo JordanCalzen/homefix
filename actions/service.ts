@@ -165,6 +165,15 @@ export async function getAllServices() {
 	try {
 		const services = await prisma.service.findMany({
 			orderBy: { createdAt: "desc" },
+			include: {
+				category: {
+					select: {
+						id: true,
+						name: true,
+						slug: true,
+					},
+				},
+			},
 		});
 
 		return {

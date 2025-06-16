@@ -24,12 +24,12 @@ export const useFetchServices = () => {
 		queryKey: ["services"],
 		queryFn: async () => {
 			const data = await getAllServices();
-			return data || [];
+			return data.data || [];
 		},
 	});
 
 	return {
-		services: servicesQuery.data?.data || [],
+		services: servicesQuery.data || [],
 		isLoading: servicesQuery.isPending,
 		error: servicesQuery.error,
 		refetch: servicesQuery.refetch,
