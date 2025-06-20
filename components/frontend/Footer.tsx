@@ -133,10 +133,10 @@ export default function Footer() {
 							</li>
 							<li>
 								<Link
-									href="#"
+									href="/provide-service-with-us"
 									className="text-gray-600 hover:text-blue-600 text-sm"
 								>
-									Provider Resources
+									Provide Services with us
 								</Link>
 							</li>
 						</ul>
