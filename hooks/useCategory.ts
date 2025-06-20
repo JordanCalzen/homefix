@@ -21,9 +21,7 @@ export const categoryKeys = {
   detail: (id: string) => [...categoryKeys.details(), id] as const,
 };
 
-/**
- * Hook for fetching categories with standard loading states
- */
+// Hook for fetching categories with standard loading states
 export function useCategories() {
   // Get all categories with standard loading states
   const {
@@ -68,7 +66,7 @@ export function useCategory(id: string) {
   return useQuery({
     queryKey: categoryKeys.detail(id),
     queryFn: () => categoryAPI.getById(id),
-    enabled: Boolean(id), // Only run if ID is provided
+    enabled: Boolean(id), 
   });
 }
 

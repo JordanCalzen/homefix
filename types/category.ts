@@ -1,33 +1,30 @@
-//payload for creating a service
+// types/category.ts
+
+// Base category data for creating a new category
 export type CategoryPayLoad = {
   name: string;
   description?: string;
   image?: string;
-  slug: string;
+  // slug is removed - it will be auto-generated
 };
 
-//payload for updating a service
+// Payload for updating a category
 export type UpdateCategoryPayload = {
   name?: string;
   description?: string;
   image?: string;
+  slug?: string; // Allow slug updates in case name changes
 };
 
-// API response type
-export type CategoryApiResponse = {
+// API response type with proper generic typing
+export type CategoryApiResponse<T = any> = {
   success: boolean;
-  data?: any;
+  data?: T;
   status?: number;
   error?: string;
 };
 
-export type CategoryProps = {
-  name: string;
-  slug: string;
-  image: string;
-  description: string;
-};
-
+// Full category data structure (matches Prisma model)
 export interface CategoryDTO {
   id: string;
   name: string;
@@ -38,3 +35,10 @@ export interface CategoryDTO {
   updatedAt: Date;
 }
 
+// Props for category components (should match DTO structure)
+export type CategoryProps = {
+  name: string;
+  slug: string;
+  image?: string; // Optional to match DTO
+  description?: string; // Optional to match DTO
+};

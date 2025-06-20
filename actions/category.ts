@@ -4,27 +4,28 @@
 import { prisma } from "@/prisma/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { generateSlug } from "@/lib/generateSlug";
 
 import {
   CategoryApiResponse,
   CategoryPayLoad,
   UpdateCategoryPayload,
+  CategoryDTO,
 } from "@/types/category";
 
 // Schema for category validation
 const categorySchema = z.object({
   name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "description is required").optional(),
-  slug: z.string().min(1, "slug is required"),
-  image: z.string().min(1, "image plate is required").optional(),
+  description: z.string().optional(),
+  image: z.string().optional(),
 });
 
 // Schema for category update validation
 const updateCategorySchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
-  description: z.string().min(1, "description is required").optional(),
-  slug: z.string().min(1, "slug  is required").optional(),
-  image: z.string().min(1, "image plate is required").optional(),
+  description: z.string().optional(),
+  image: z.string().optional(),
+  slug: z.string().min(1, "Slug is required").optional(),
 });
 
 /**
@@ -32,46 +33,56 @@ const updateCategorySchema = z.object({
  */
 export async function createCategory(
   data: CategoryPayLoad
-): Promise<CategoryApiResponse> {
+): Promise<CategoryApiResponse<CategoryDTO>> {
   try {
-    const slug = data.slug;
-    const existingCategory = await prisma.category.findUnique({
-      where: {
-        slug,
-      },
-    });
-    if (existingCategory) {
-      return {
-        status: 409,
-        data: null,
-        success: false,
-        error: "Category Already exists",
-      };
-    }
     // Validate data
     const validated = categorySchema.parse(data);
+    
+    // Generate slug from name
+    const slug = generateSlug(validated.name);
+    
+    // Check if slug already exists
+    const existingCategory = await prisma.category.findUnique({
+      where: { slug },
+    });
+    
+    if (existingCategory) {
+      return {
+        success: false,
+        status: 409,
+        error: "A category with this name already exists",
+      };
+    }
 
     // Create new category
-    const Category = await prisma.category.create({
+    const category = await prisma.category.create({
       data: {
         name: validated.name,
-        slug: validated.slug,
-        description: validated.description,
+        slug,
+        description: validated.description || null,
+        image: validated.image || null,
       },
     });
 
-    revalidatePath("/products");
+    revalidatePath("/dashboard/categories");
 
     return {
       success: true,
-      data: Category,
+      data: category,
     };
   } catch (error) {
-    console.error("Error creating product:", error);
+    console.error("Error creating category:", error);
+    
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: error.errors[0]?.message || "Validation error",
+      };
+    }
+    
     return {
       success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to create product",
+      error: error instanceof Error ? error.message : "Failed to create category",
     };
   }
 }
@@ -82,25 +93,59 @@ export async function createCategory(
 export async function editCategory(
   id: string,
   data: UpdateCategoryPayload
-): Promise<CategoryApiResponse> {
+): Promise<CategoryApiResponse<CategoryDTO>> {
   try {
+    // Validate data
+    const validated = updateCategorySchema.parse(data);
+    
+    // If name is being updated, regenerate slug
+    let updateData = { ...validated };
+    if (validated.name) {
+      const newSlug = generateSlug(validated.name);
+      
+      // Check if the new slug conflicts with existing categories (excluding current one)
+      const existingCategory = await prisma.category.findFirst({
+        where: {
+          slug: newSlug,
+          NOT: { id },
+        },
+      });
+      
+      if (existingCategory) {
+        return {
+          success: false,
+          status: 409,
+          error: "A category with this name already exists",
+        };
+      }
+      
+      updateData.slug = newSlug;
+    }
+
     const updatedCategory = await prisma.category.update({
-      where: {
-        id,
-      },
-      data,
+      where: { id },
+      data: updateData,
     });
+    
     revalidatePath("/dashboard/categories");
+    
     return {
       success: true,
       data: updatedCategory,
     };
   } catch (error) {
-    console.error("Error updating Category:", error);
+    console.error("Error updating category:", error);
+    
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: error.errors[0]?.message || "Validation error",
+      };
+    }
+    
     return {
       success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to update category",
+      error: error instanceof Error ? error.message : "Failed to update category",
     };
   }
 }
@@ -108,18 +153,26 @@ export async function editCategory(
 /**
  * Deletes a category
  */
-export async function deleteCategory(id: string): Promise<CategoryApiResponse> {
+export async function deleteCategory(
+  id: string
+): Promise<CategoryApiResponse<null>> {
   try {
-    // Check if product exists and has sales
+    // Check if category exists and has services
     const category = await prisma.category.findUnique({
       where: { id },
-      include: { services: { take: 1 } },
+      include: { 
+        services: { 
+          select: { id: true },
+          take: 1 
+        } 
+      },
     });
 
     if (!category) {
       return {
         success: false,
-        error: "category not found",
+        status: 404,
+        error: "Category not found",
       };
     }
 
@@ -127,6 +180,7 @@ export async function deleteCategory(id: string): Promise<CategoryApiResponse> {
     if (category.services.length > 0) {
       return {
         success: false,
+        status: 400,
         error: "Cannot delete category with existing services",
       };
     }
@@ -136,25 +190,25 @@ export async function deleteCategory(id: string): Promise<CategoryApiResponse> {
       where: { id },
     });
 
-    revalidatePath("/service/categories");
+    revalidatePath("/dashboard/categories");
 
     return {
       success: true,
+      data: null,
     };
   } catch (error) {
     console.error("Error deleting category:", error);
     return {
       success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to delete category",
+      error: error instanceof Error ? error.message : "Failed to delete category",
     };
   }
 }
 
 /**
- * Gets all Categories
+ * Gets all categories
  */
-export async function getAllCategories(): Promise<CategoryApiResponse> {
+export async function getAllCategories(): Promise<CategoryApiResponse<CategoryDTO[]>> {
   try {
     const categories = await prisma.category.findMany({
       orderBy: { createdAt: "desc" },
@@ -168,8 +222,7 @@ export async function getAllCategories(): Promise<CategoryApiResponse> {
     console.error("Error fetching categories:", error);
     return {
       success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to fetch categories",
+      error: error instanceof Error ? error.message : "Failed to fetch categories",
     };
   }
 }
@@ -179,7 +232,7 @@ export async function getAllCategories(): Promise<CategoryApiResponse> {
  */
 export async function getCategoryById(
   id: string
-): Promise<CategoryApiResponse> {
+): Promise<CategoryApiResponse<CategoryDTO>> {
   try {
     const category = await prisma.category.findUnique({
       where: { id },
@@ -188,7 +241,8 @@ export async function getCategoryById(
     if (!category) {
       return {
         success: false,
-        error: "category not found",
+        status: 404,
+        error: "Category not found",
       };
     }
 
@@ -200,114 +254,39 @@ export async function getCategoryById(
     console.error("Error fetching category:", error);
     return {
       success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to fetch category",
+      error: error instanceof Error ? error.message : "Failed to fetch category",
     };
   }
 }
 
-// "use server";
+/**
+ * Gets a single category by slug
+ */
+export async function getCategoryBySlug(
+  slug: string
+): Promise<CategoryApiResponse<CategoryDTO>> {
+  try {
+    const category = await prisma.category.findUnique({
+      where: { slug },
+    });
 
-// import { prisma } from "@/prisma/db";
-// import { CategoryProps } from "@/types/category";
-// import { revalidatePath } from "next/cache";
+    if (!category) {
+      return {
+        success: false,
+        status: 404,
+        error: "Category not found",
+      };
+    }
 
-// export async function createCategory(data: CategoryProps) {
-//   const slug = data.slug;
-//   try {
-//     const existingCategory = await prisma.category.findUnique({
-//       where: {
-//         slug,
-//       },
-//     });
-//     if (existingCategory) {
-//       return {
-//         status: 409,
-//         data: null,
-//         error: "Category Already exists",
-//       };
-//     }
-//     const newCategory = await prisma.category.create({
-//       data,
-//     });
-//     // console.log(newCategory);
-//     revalidatePath("/dashboard/services/categories");
-//     return {
-//       status: 200,
-//       data: newCategory,
-//       error: null,
-//     };
-//   } catch (error) {
-//     console.log(error);
-//     return {
-//       status: 200,
-//       error: "Something went wrong",
-//       data: null,
-//     };
-//   }
-// }
-// export async function getAllCategories() {
-//   try {
-//     const categories = await prisma.category.findMany({
-//       orderBy: {
-//         createdAt: "desc",
-//       },
-//     });
-
-//     return categories;
-//   } catch (error) {
-//     console.log(error);
-//     return [];
-//   }
-// }
-// export async function updateCategoryById(id: string, data: CategoryProps) {
-//   try {
-//     const updatedCategory = await prisma.category.update({
-//       where: {
-//         id,
-//       },
-//       data,
-//     });
-//     revalidatePath("/dashboard/categories");
-//     return updatedCategory;
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
-// export async function getCategoryById(id: string) {
-//   try {
-//     const category = await prisma.category.findUnique({
-//       where: {
-//         id,
-//       },
-//     });
-//     return category;
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
-// export async function deleteCategory(id: string) {
-//   try {
-//     const deletedCategory = await prisma.category.delete({
-//       where: {
-//         id,
-//       },
-//     });
-
-//     return {
-//       ok: true,
-//       data: deletedCategory,
-//     };
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
-// // export async function createBulkCategories(categories: CategoryProps[]) {
-// //   try {
-// //     for (const category of categories) {
-// //       await createCategory(category);
-// //     }
-// //   } catch (error) {
-// //     console.log(error);
-// //   }
-// // }
+    return {
+      success: true,
+      data: category,
+    };
+  } catch (error) {
+    console.error("Error fetching category:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to fetch category",
+    };
+  }
+}
