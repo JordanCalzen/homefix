@@ -6,9 +6,9 @@ import { Button } from "../ui/button";
 import { useSearchParams } from "next/navigation";
 
 export default function ManagerHeader() {
-	const searchParams = useSearchParams();
-	const role = searchParams.get("role") || "manager";
-	console.log(role);
+	// const searchParams = useSearchParams();
+	// const role = searchParams.get("role") || "manager";
+	// console.log(role);
 	return (
 		<header className=" border-b  bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 rounded-lg sticky top-0 z-50">
 			<div className=" flex h-16  px-2 items-center justify-between">
@@ -45,7 +45,7 @@ export default function ManagerHeader() {
 					asChild
 					className="ml-4 hidden sm:inline-flex bg-gradient-to-r from-sky-400 to-blue-600 text-white hover:bg-sky-300 hover:to-blue-600/80 hover:text-white transition duration-300"
 				>
-					<Link href={"/onboarding?role=manager"}>Get Started</Link>
+					<Link href={""}>Get Started</Link>
 				</Button>
 			</div>
 		</header>
