@@ -11,26 +11,26 @@ import { toast } from "sonner";
 import { WholeWord } from "lucide-react";
 
 import {
-  DataTable,
-  Column,
-  TableActions,
-  EntityForm,
-  ConfirmationDialog,
+	DataTable,
+	Column,
+	TableActions,
+	EntityForm,
+	ConfirmationDialog,
 } from "@/components/ui/data-table";
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+	FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  useCreateCategory,
-  useDeleteCategory,
-  useSuspenseCategories,
-  useUpdateCategory,
+	useCreateCategory,
+	useDeleteCategory,
+	useSuspenseCategories,
+	useUpdateCategory,
 } from "@/hooks/useCategory";
 import ImageUploadButton from "../FormInputs/ImageUploadButton";
 import {
@@ -41,19 +41,24 @@ import {
 } from "@/types/category";
 
 interface CategoryDetailProps {
-  title: string;
+	title: string;
 }
 
 // Form schema for editing/adding categories - matches CategoryPayLoad
 const categoryFormSchema = z.object({
+
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
   image: z.string().optional(),
+
+	
+
 });
 
 type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 
 export default function CategoryDetail({ title }: CategoryDetailProps) {
+
   // React Query hooks with Suspense
   const { categories, refetch } = useSuspenseCategories();
   const createCategoryMutation = useCreateCategory();
@@ -139,8 +144,10 @@ export default function CategoryDetail({ title }: CategoryDetailProps) {
       // Generate filename with current date
       const fileName = `Categories_${format(new Date(), "yyyy-MM-dd")}.xlsx`;
 
-      // Export to file
-      XLSX.writeFile(workbook, fileName);
+
+			// Export to file
+			XLSX.writeFile(workbook, fileName);
+
 
       toast.success("Export successful", {
         description: `Categories exported to ${fileName}`,
@@ -155,11 +162,13 @@ export default function CategoryDetail({ title }: CategoryDetailProps) {
     }
   };
 
-  // Handle add new click
-  const handleAddClick = () => {
-    setCurrentCategory(null);
-    setFormDialogOpen(true);
-  };
+
+	// Handle add new click
+	const handleAddClick = () => {
+		setCurrentCategory(null);
+		setFormDialogOpen(true);
+	};
+
 
   // Handle edit click
   const handleEditClick = (category: CategoryDTO) => {
@@ -393,4 +402,5 @@ export default function CategoryDetail({ title }: CategoryDetailProps) {
       />
     </>
   );
+
 }

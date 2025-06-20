@@ -3,9 +3,14 @@ export type ServicePayLoad = {
 	name: string;
 	price: string;
 	description: string;
-	categoryId: string;
+	categoryId?: string;
 };
-
+export type formPayLoad = {
+	name: string;
+	price: string;
+	description: string;
+	categoryId?: string;
+};
 //payload for updating a service
 export type UpdateServicePayload = {
 	name?: string;

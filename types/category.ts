@@ -2,14 +2,17 @@
 
 // Base category data for creating a new category
 export type CategoryPayLoad = {
+
   name: string;
   description?: string;
   image?: string;
   // slug is removed - it will be auto-generated
+
 };
 
 // Payload for updating a category
 export type UpdateCategoryPayload = {
+
   name?: string;
   description?: string;
   image?: string;
@@ -42,3 +45,4 @@ export type CategoryProps = {
   image?: string; // Optional to match DTO
   description?: string; // Optional to match DTO
 };
+
