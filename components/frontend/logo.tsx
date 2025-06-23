@@ -4,7 +4,7 @@ import React from "react";
 
 export default function Logo({ href }: { href: string }) {
 	return (
-		<Link href={href} className=" w-[180px] flex items-center gap-2 p-3">
+		<Link href={href} className=" w-[180px] flex items-center gap-2 ">
 			<Image
 				src="/1-removebg-preview.png"
 				alt=""
