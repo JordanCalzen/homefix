@@ -1,26 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ChevronRight, TrendingUp, Star } from "lucide-react";
+import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useCategories } from "@/hooks/useCategory";
-import { CategoryDTO, CategoryProps } from "@/types/category";
+import { CategoryDTO } from "@/types/category";
 import Link from "next/link";
 import Image from "next/image";
-
-interface CategoryItem {
-	id: number;
-	name: string;
-	slug: string;
-	image: string;
-	featured?: boolean;
-	isNew?: boolean;
-	discount?: string;
-	overlayColor?: string;
-}
+import { Button } from "../ui/button";
+import CategorySectionSkeleton from "./category-skeleton";
 
 export default function CategoryListingSection() {
 	const [hoveredCategory, setHoveredCategory] = useState<number | null>(null);
 	const [isVisible, setIsVisible] = useState(false);
+	const [startIndex, setStartIndex] = useState(0);
+	const itemsToShow = 5; // Number of categories to show at once
 
 	// Animation on mount
 	useEffect(() => {
@@ -29,98 +22,148 @@ export default function CategoryListingSection() {
 
 	const { categories, isLoading } = useCategories();
 
+	const nextSlide = () => {
+		setStartIndex((prevIndex) =>
+			prevIndex + itemsToShow >= categories.length ? 0 : prevIndex + 1
+		);
+	};
+
+	const prevSlide = () => {
+		setStartIndex((prevIndex) =>
+			prevIndex === 0
+				? Math.max(0, categories.length - itemsToShow)
+				: prevIndex - 1
+		);
+	};
+
+	const visibleCategories = categories.slice(
+		startIndex,
+		startIndex + itemsToShow
+	);
+
+	// Fill with empty slots if not enough categories
+	while (visibleCategories.length < itemsToShow && categories.length > 0) {
+		visibleCategories.push(
+			categories[visibleCategories.length % categories.length]
+		);
+	}
+
+	if (isLoading) {
+		return <CategorySectionSkeleton />;
+	}
+
 	return (
-		<div className="w-full py-10 px-4 md:px-8 bg-gray-200 ">
-			<div className="max-w-7xl mx-auto">
-				{/* Section Header */}
+		<section className="py-12 bg-gradient-to-b from-blue-50/50 to-white">
+			<div className="container  max-w-7xl px-4 mx-auto">
 				<div
-					className={`mb-8 transition-opacity duration-700 ${
+					className={`flex items-center justify-between mb-8 transition-opacity duration-700 ${
 						isVisible ? "opacity-100" : "opacity-0"
 					}`}
 				>
-					<div className="flex items-center justify-between">
-						<div className="flex items-center space-x-2">
-							<div className="w-1 h-8 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full"></div>
-							<h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-								Explore Popular Categories
-							</h2>
-						</div>
-						<a
+					<div>
+						<h2 className="text-2xl md:text-3xl font-bold mb-2">
+							Explore Popular Categories
+						</h2>
+						<p className="text-gray-600">
+							Find services tailored to your needs and interests - select
+							Service Category
+						</p>
+					</div>
+					<div className="flex gap-2">
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={prevSlide}
+							className="hidden md:flex"
+						>
+							<ChevronLeft className="h-4 w-4" />
+						</Button>
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={nextSlide}
+							className="hidden md:flex"
+						>
+							<ChevronRight className="h-4 w-4" />
+						</Button>
+						<Button
+							asChild
+							variant="outline"
+							className="hidden sm:flex  px-6 py-2.5 bg-white border border-blue-200 rounded-lg text-sm font-medium text-blue-700 shadow-sm hover:bg-blue-50 transition-colors"
+						>
+							<Link href="/events">View All Categories</Link>
+						</Button>
+					</div>
+				</div>
+
+				<div className="relative">
+					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+						{visibleCategories.map((category: CategoryDTO, index: number) => (
+							<div
+								key={`${category.id}-${index}`}
+								className={`group transition-all duration-300 ${
+									isVisible
+										? "opacity-100 translate-y-0"
+										: "opacity-0 translate-y-5"
+								}`}
+								style={{
+									transitionDelay: `${index * 100}ms`,
+								}}
+							>
+								<Link href={`/category/${category.slug}`}>
+									<div
+										className="relative h-40 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500"
+										onMouseEnter={() => setHoveredCategory(Number(category.id))}
+										onMouseLeave={() => setHoveredCategory(null)}
+									>
+										<div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent z-10" />
+										<Image
+											src={category.image as string}
+											alt={category.name}
+											fill
+											className="object-cover transition-transform duration-300 group-hover:scale-110"
+										/>
+										<div className="absolute bottom-0 left-0 right-0 p-4 z-20">
+											<h3 className="text-white font-semibold text-lg">
+												{category.name}
+											</h3>
+											<div className="inline-block mt-1 px-2 py-1 bg-white/20 hover:bg-white/30 rounded text-xs text-white font-medium transition-colors">
+												Explore
+											</div>
+										</div>
+									</div>
+								</Link>
+							</div>
+						))}
+					</div>
+
+					{/* Mobile navigation controls */}
+					<div className="flex justify-center mt-6 md:hidden">
+						<button
+							onClick={prevSlide}
+							className="flex items-center justify-center w-10 h-10 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors mr-2"
+						>
+							<ChevronLeft className="h-4 w-4" />
+						</button>
+						<button
+							onClick={nextSlide}
+							className="flex items-center justify-center w-10 h-10 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+						>
+							<ChevronRight className="h-4 w-4" />
+						</button>
+					</div>
+
+					{/* Mobile "View All" button */}
+					<div className="flex justify-center mt-6 sm:hidden">
+						<Link
 							href="/categories"
-							className="hidden md:flex items-center text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors"
+							className="flex items-center justify-center px-6 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
 						>
 							View All Categories
-							<ChevronRight className="h-4 w-4 ml-1" />
-						</a>
-					</div>
-					<p className="text-gray-500 mt-2 ml-4">
-						Your Home, Our Pros - Select a Service Category
-					</p>
-				</div>
-
-				{/* Premium Grid Component */}
-
-				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-5">
-					{categories.map((category: CategoryDTO) => (
-						<Link
-							key={category.id}
-							href={`/category/${category.slug}`}
-							className="relative rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 group"
-							onMouseEnter={() => setHoveredCategory(Number(category.id))}
-							onMouseLeave={() => setHoveredCategory(null)}
-						>
-							{/* Card with consistent aspect ratio */}
-							<div className="aspect-square relative overflow-hidden">
-								{/* Background Image */}
-								<Image
-									src={category.image as string}
-									alt={category.name}
-									width={500}
-									height={500}
-									className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-								/>
-
-								{/* Smooth Gradient Overlay */}
-								<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-75 transition-opacity duration-300"></div>
-
-								{/* Alternative overlay options - uncomment one of these instead of the above if you prefer */}
-
-								{/* Option 1: Subtle dark overlay */}
-								{/* <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors duration-300"></div> */}
-
-								{/* Option 2: Colored gradient overlay */}
-								{/* <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-amber-600/30 to-black/60 group-hover:from-amber-500/30 group-hover:via-amber-600/40 group-hover:to-black/70 transition-all duration-300"></div> */}
-
-								{/* Option 3: Bottom-heavy gradient */}
-								{/* <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10 group-hover:from-black/90 group-hover:via-black/50 group-hover:to-black/20 transition-all duration-300"></div> */}
-
-								{/* Beautifully overlaid category title */}
-								<div className="absolute inset-x-0 bottom-0 p-4 flex items-end z-10">
-									<div className="transform group-hover:translate-y-[-4px] transition-transform duration-300 w-full">
-										<h3 className="text-white text-sm md:text-base font-medium leading-tight drop-shadow-lg">
-											{category.name}
-										</h3>
-
-										{/* Subtle line animation */}
-										<div className="h-0.5 w-0 bg-white mt-2 group-hover:w-1/2 transition-all duration-500 ease-out"></div>
-									</div>
-								</div>
-							</div>
 						</Link>
-					))}
-				</div>
-
-				{/* Mobile "View All" button */}
-				<div className="mt-8 flex justify-center md:hidden">
-					<a
-						href="/categories"
-						className="flex items-center justify-center px-6 py-2.5 bg-white border border-amber-200 rounded-lg text-sm font-medium text-amber-700 shadow-sm hover:bg-amber-50 transition-colors"
-					>
-						View All Categories
-						<ChevronRight className="h-4 w-4 ml-1" />
-					</a>
+					</div>
 				</div>
 			</div>
-		</div>
+		</section>
 	);
 }

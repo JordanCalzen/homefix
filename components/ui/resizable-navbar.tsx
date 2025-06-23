@@ -9,6 +9,7 @@ import {
 } from "framer-motion";
 import Link from "next/link";
 import React, { useRef, useState } from "react";
+import Image from "next/image";
 
 interface NavbarProps {
 	children: React.ReactNode;
@@ -236,9 +237,15 @@ export const MobileNavToggle = ({
 export const NavbarLogo = () => {
 	return (
 		<Link href="/" className="z-50 flex items-center justify-center gap-2">
-			<img src="/logo.webp" alt="logo" className="h-8 w-8 rounded-full" />
-			<span className="bg-primary from-foreground via-rose-200 to-primary bg-clip-text text-2xl font-semibold text-transparent dark:bg-gradient-to-b md:text-xl">
-				Mvpblocks
+			<Image
+				src="/homefix-logo.png"
+				alt="logo"
+				width={300}
+				height={300}
+				className="h-8 w-8 "
+			/>
+			<span className="text-transparent bg-gradient-to-r from-blue-600 via-rose-400 to-purple-600 bg-clip-text font-extrabold tracking-tight text-xl ">
+				HomeFix
 			</span>
 		</Link>
 	);

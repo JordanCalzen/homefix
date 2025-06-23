@@ -18,7 +18,7 @@ export default async function FrontendLayout({
 		<div className="min-h-screen bg-white font-[Montserrat] ">
 			{/* <Header session={session} /> */}
 			<NavbarDemo session={session} />
-			<div className="px-2 sm:px-4">{children}</div>
+			<div className="">{children}</div>
 			{/* <Footer/> */}
 			<SiteFooter />
 		</div>

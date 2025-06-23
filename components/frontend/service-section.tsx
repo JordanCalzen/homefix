@@ -14,6 +14,7 @@ import {
 	Sparkles,
 } from "lucide-react";
 import { useFetchServices } from "@/hooks/useService";
+import FeaturedCollectionSkeleton from "./service-card-skeleton";
 
 // Service type definition matching your ServicePayLoad
 export type ServicePayLoad = {
@@ -295,36 +296,19 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
 	}, [services.length]);
 
 	if (isLoading) {
-		return (
-			<div className="w-full max-w-7xl mx-auto px-4 py-8">
-				<div className="flex justify-between items-center mb-8">
-					<div className="h-8 bg-gray-200 rounded animate-pulse w-64" />
-					<div className="flex space-x-3">
-						<div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
-						<div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
-					</div>
-				</div>
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-					{Array.from({ length: 4 }).map((_, i) => (
-						<ServiceCardSkeleton key={i} />
-					))}
-				</div>
-			</div>
-		);
+		return <FeaturedCollectionSkeleton />;
 	}
 
 	return (
 		<div className="w-full max-w-7xl mx-auto px-4 py-8">
 			{/* Header with product-style design */}
 			<div className="flex justify-between items-center mb-8">
-				<h2 className="relative text-3xl font-bold text-gray-900 tracking-tight">
-					<span className="relative inline-block after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-2/3 after:h-1 after:bg-gradient-to-r after:from-blue-500 after:to-purple-500">
-						{title}
-					</span>
-					<span className="absolute -top-4 -left-3 text-5xl text-blue-100 font-extrabold opacity-50 select-none">
-						Services
-					</span>
-				</h2>
+				<div>
+					<h2 className="text-2xl md:text-3xl font-bold mb-2">{title}</h2>
+					<p className="text-gray-600">
+						Discover personalized services designed just for you.
+					</p>
+				</div>
 				<div className="flex space-x-3">
 					<button
 						onClick={goToPrev}

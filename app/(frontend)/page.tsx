@@ -26,9 +26,11 @@ import CategoryListingSection from "@/components/frontend/categories";
 import ServiceSection, {
 	ServiceCardSkeleton,
 } from "@/components/frontend/service-section";
-import { Hero } from "@/components/frontend/hero";
+// import { Hero } from "@/components/frontend/hero";
 import ServiceSectionContent from "@/components/frontend/service-section-content";
 import { Suspense } from "react";
+import Hero from "@/components/frontend/hero";
+import FeaturedCollectionSkeleton from "@/components/frontend/service-card-skeleton";
 
 interface IServices {
 	id: number;
@@ -107,11 +109,10 @@ export default function ExplorePage() {
 			<main>
 				{/* Hero Section */}
 				<Hero />
-
 				<CategoryListingSection />
 
 				{/* Explore Services Section */}
-				<section className="py-12 md:py-16">
+				{/* <section className="py-12 md:py-16">
 					<div className="px-2 md:px-8 ">
 						<div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
 							<h2 className="text-2xl md:text-3xl font-bold font-[Sora] text-gray-900">
@@ -137,10 +138,10 @@ export default function ExplorePage() {
 							))}
 						</div>
 					</div>
-				</section>
+				</section> */}
 
 				{/* Service Listing*/}
-				<Suspense fallback={<ServiceCardSkeleton />}>
+				<Suspense fallback={<FeaturedCollectionSkeleton />}>
 					<ServiceSectionContent />
 				</Suspense>
 
