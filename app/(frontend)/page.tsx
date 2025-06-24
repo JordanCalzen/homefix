@@ -31,6 +31,8 @@ import ServiceSectionContent from "@/components/frontend/service-section-content
 import { Suspense } from "react";
 import Hero from "@/components/frontend/hero";
 import FeaturedCollectionSkeleton from "@/components/frontend/service-card-skeleton";
+import TestimonialsCarousel from "@/components/frontend/top-providers";
+import ProviderTestimonials from "@/components/frontend/top-providers";
 
 interface IServices {
 	id: number;
@@ -144,26 +146,8 @@ export default function ExplorePage() {
 				<Suspense fallback={<FeaturedCollectionSkeleton />}>
 					<ServiceSectionContent />
 				</Suspense>
-
-				{/* Top-Rated Providers Section */}
-				<section className="py-12 md:py-16 bg-blue-50">
-					<div className="px-2 md:px-8">
-						<h2 className="text-2xl md:text-3xl font-bold font-[Sora] text-gray-900 mb-8">
-							Top Service Providers
-						</h2>
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-							{providers.map((provider) => (
-								<ProviderCard key={provider.id} provider={provider} />
-							))}
-						</div>
-						<div className="mt-10 text-center">
-							<Button variant="outline" className="bg-white">
-								View All Providers
-								<ArrowRight className="ml-2 h-4 w-4" />
-							</Button>
-						</div>
-					</div>
-				</section>
+				<ProviderTestimonials />
+				{/* <TestimonialsCarousel /> */}
 
 				{/* Customer Reviews Section */}
 				<section className="py-12 md:py-16">
@@ -180,7 +164,7 @@ export default function ExplorePage() {
 				</section>
 
 				{/* CTA Banner */}
-				<CtaV6 />
+				{/* <CtaV6 /> */}
 			</main>
 			{/* Floating Quote Calculator Button */}
 			<div className="fixed bottom-6 right-6">
@@ -261,87 +245,6 @@ function ServiceCard({ service }: { service: IServices }) {
 					</Link>
 				</Button>
 			</CardFooter> */}
-		</Card>
-	);
-}
-
-// Provider Card Component
-function ProviderCard({ provider }: { provider: IProviders }) {
-	return (
-		<Card className="relative overflow-hidden transition-all duration-300 hover:shadow-md bg-white">
-			<CardContent className="p-2 md:p-6">
-				<div className="flex items-start gap-4">
-					<div className="relative  ">
-						<Image
-							src={provider.avatar || "/placeholder.svg?height=80&width=80"}
-							alt={provider.name}
-							width={80}
-							height={80}
-							className="rounded-full w-20 h-20  object-cover"
-						/>
-						{provider.verified && (
-							<div className="absolute bottom-[3px] right-[5px] bg-blue-100 rounded-full p-0.5">
-								<CheckCircle className="h-4 w-4 text-blue-600" />
-							</div>
-						)}
-					</div>
-					<div className="flex-1">
-						<div className="flex items-center justify-between">
-							<h3 className="text-lg font-bold font-[Sora]">{provider.name}</h3>
-							{provider.verified}
-						</div>
-						<p className="text-gray-600 font-medium text-sm">
-							{provider.profession}
-						</p>
-						<div className="flex items-center mt-1 mb-2">
-							<div className="flex">
-								{[...Array(5)].map((_, i) => (
-									<Star
-										key={i}
-										className={`h-4 w-4 ${
-											i < provider.rating
-												? "text-yellow-400 fill-yellow-400"
-												: "text-gray-300"
-										}`}
-									/>
-								))}
-							</div>
-							<span className="ml-2 text-sm text-gray-600">
-								({provider.reviewCount})
-							</span>
-						</div>
-						<div className="flex items-center text-sm text-gray-600 mb-3">
-							<MapPin className="h-3 w-3 mr-1" />
-							{provider.location}
-						</div>
-						<div className="flex flex-wrap gap-1 mb-4">
-							{provider.services.map((service, index) => (
-								<Badge
-									key={index}
-									variant="secondary"
-									className="bg-gray-100  text-gray-700"
-								>
-									{service}
-								</Badge>
-							))}
-						</div>
-					</div>
-				</div>
-			</CardContent>
-			<CardFooter className=" flex items-center justify-center gap-6 bottom-0 p-6 pt-0 ">
-				<Button
-					variant="outline"
-					className="w-full border-blue-200 text-blue-700 hover:bg-blue-50"
-				>
-					View Profile
-				</Button>
-				<Button
-					variant="outline"
-					className="w-full border-blue-200 text-blue-700 hover:bg-blue-50"
-				>
-					Book now
-				</Button>
-			</CardFooter>
 		</Card>
 	);
 }
